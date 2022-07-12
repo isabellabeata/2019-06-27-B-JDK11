@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 
 import it.polito.tdp.crimes.model.Arco;
 import it.polito.tdp.crimes.model.Model;
+import it.polito.tdp.crimes.model.ReatoQuartieri;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -63,7 +64,10 @@ public class CrimesController {
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Calcola percorso...\n");
+    	Arco a= this.boxArco.getValue();
+    	for(ReatoQuartieri ri: this.model.calcolaPercorso(a)) {
+    		this.txtResult.appendText(ri.toString()+"\n");
+    	}
     }
     
     @FXML // This method is called by the FXMLLoader when initialization is complete

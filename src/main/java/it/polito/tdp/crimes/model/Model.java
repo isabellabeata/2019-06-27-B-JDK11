@@ -14,6 +14,7 @@ public class Model {
 	private EventsDao dao;
 	private Graph<ReatoQuartieri,DefaultWeightedEdge> grafo;
 	private List<Arco> archi;
+	List<ReatoQuartieri> best;
 	
 	public Model() {
 		this.dao= new EventsDao();
@@ -83,6 +84,36 @@ public class Model {
 		}
 		return list;
 		
+	}
+	
+	public List<ReatoQuartieri> calcolaPercorso(Arco a){
+		this.best= new ArrayList<ReatoQuartieri>();
+		this.best.add(a.getQ1());
+		List<ReatoQuartieri> parziale=new ArrayList<ReatoQuartieri>();
+		parziale.add(a.getQ1());
+		cerca(parziale,a.getQ2());
+		
+		return best;
+		
+	}
+
+	private void cerca(List<ReatoQuartieri> parziale, ReatoQuartieri q2) {
+		if(parziale.get(parziale.size()-1).equals(q2)) {
+			if(parziale.size()>best.size() ) {
+				this.best=new ArrayList<ReatoQuartieri>(parziale);
+				return;
+			}
+		}
+		
+		for(DefaultWeightedEdge ei: this.grafo.edgesOf(parziale.get(parziale.size()-1))) {
+			
+			ReatoQuartieri qi= Graphs.getOppositeVertex(this.grafo, ei, parziale.get(parziale.size()-1));
+			if(!parziale.contains(qi)) {
+				parziale.add(qi);
+				cerca(parziale, q2);
+				parziale.remove(parziale.size()-1);
+			}
+		}
 	}
 	
 }
