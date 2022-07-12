@@ -105,9 +105,8 @@ public class Model {
 			}
 		}
 		
-		for(DefaultWeightedEdge ei: this.grafo.edgesOf(parziale.get(parziale.size()-1))) {
+		for(ReatoQuartieri qi: Graphs.neighborListOf(this.grafo, parziale.get(parziale.size()-1))) {
 			
-			ReatoQuartieri qi= Graphs.getOppositeVertex(this.grafo, ei, parziale.get(parziale.size()-1));
 			if(!parziale.contains(qi)) {
 				parziale.add(qi);
 				cerca(parziale, q2);
