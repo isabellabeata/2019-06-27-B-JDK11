@@ -6,22 +6,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import it.polito.tdp.crimes.model.Arco;
 import it.polito.tdp.crimes.model.Event;
+import it.polito.tdp.crimes.model.ReatoQuartieri;
 
 
 public class EventsDao {
-	
+
 	public List<Event> listAllEvents(){
 		String sql = "SELECT * FROM events" ;
 		try {
 			Connection conn = DBConnect.getConnection() ;
 
 			PreparedStatement st = conn.prepareStatement(sql) ;
-			
+
 			List<Event> list = new ArrayList<>() ;
-			
+
 			ResultSet res = st.executeQuery() ;
-			
+
 			while(res.next()) {
 				try {
 					list.add(new Event(res.getLong("incident_id"),
@@ -43,7 +46,7 @@ public class EventsDao {
 					System.out.println(res.getInt("id"));
 				}
 			}
-			
+
 			conn.close();
 			return list ;
 
@@ -52,6 +55,145 @@ public class EventsDao {
 			e.printStackTrace();
 			return null ;
 		}
+	}
+
+	public List<String> popolaOffenceCategory(){
+		String sql="SELECT DISTINCT e.offense_category_id AS cat "
+				+ "FROM events e "
+				+ "ORDER BY cat";
+
+		try {
+			Connection conn = DBConnect.getConnection() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+
+			List<String> list = new ArrayList<>() ;
+
+			ResultSet res = st.executeQuery() ;
+
+			while(res.next()) {
+				try {
+					list.add(res.getString("cat"));
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+
+			conn.close();
+			return list ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
+
+	public List<Integer> getData(){
+		String sql="SELECT distinct Month(e.reported_date) AS dat "
+				+ "FROM `events` e "
+				+ "ORDER BY dat";
+
+		try {
+			Connection conn = DBConnect.getConnection() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+
+			List<Integer> list = new ArrayList<>() ;
+
+			ResultSet res = st.executeQuery() ;
+
+			while(res.next()) {
+				try {
+					list.add(res.getInt("dat"));
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+
+			conn.close();
+			return list ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
+
+	public List<ReatoQuartieri> getVertici(String offense_category, Integer mese){
+		String sql="SELECT DISTINCT (e1.offense_type_id) AS tip "
+				+ "FROM `events` e1 "
+				+ "WHERE e1.offense_category_id=? AND MONTH(e1.reported_date)=? "
+				+ "GROUP BY tip "
+				+ "ORDER BY tip";
+		try {
+			Connection conn = DBConnect.getConnection() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setString(1, offense_category);
+			st.setInt(2, mese);
+
+			List<ReatoQuartieri> list = new ArrayList<>() ;
+
+			ResultSet res = st.executeQuery() ;
+
+			while(res.next()) {
+				try {
+					list.add(new ReatoQuartieri(res.getString("tip")));
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+
+			conn.close();
+			return list ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
+
+	public Arco getArco(ReatoQuartieri q1, ReatoQuartieri q2) {
+		String sql="SELECT e2.neighborhood_id "
+				+ "FROM events e1,events e2 "
+				+ "WHERE e1.offense_type_id=? AND e2.offense_type_id=? "
+				+ "AND e1.neighborhood_id=e2.neighborhood_id "
+				+ "GROUP BY e2.neighborhood_id";
+
+		try {
+			Connection conn = DBConnect.getConnection() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setString(1, q1.toString());
+			st.setString(2, q2.toString());
+			List<Arco> list= new ArrayList<>();
+			Arco a= null;
+
+			ResultSet res = st.executeQuery() ;
+
+			while(res.next()) {
+
+				a= new Arco(q1, q2,0);
+				list.add(a);
+			}
+			if(a!=null) {
+				a.setPeso(list.size());
+			}
+			conn.close();
+			return a ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+
 	}
 
 }
